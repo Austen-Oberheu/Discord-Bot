@@ -1,6 +1,12 @@
 import asyncio
+import datetime
+import random
 import discord
 from discord.ext import commands
+
+profanity_filter = ['crap']
+
+calvin_lines = ["You know Blitz has gadget right?", "Don't kill him because he looked at you funny", "You Maverick has a gadget right?", "Calvin is gay"]
 
 if not discord.opus.is_loaded():
     # the 'opus' library here is opus.dll on windows
@@ -231,11 +237,30 @@ class Music:
             skip_count = len(state.skip_votes)
             await self.bot.say('Now playing {} [skips: {}/3]'.format(state.current, skip_count))
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or('$'), description='A playlist example for discord.py')
+    @commands.command(pass_context=True, no_pm=True)
+    async def calvin(self, ctx):
+        await self.bot.say(random.choice(calvin_lines))
+
+    async def on_message(self, message):
+        if message.author == bot.user:
+            return
+        if message.content == 'Calvin is gay':
+            await self.bot.send_message(message.channel, 'It is known')
+            return
+        msg = message.content
+        for word in profanity_filter:
+            if word in msg:
+                await self.bot.delete_message(message)
+                await self.bot.send_message(message.channel, 'Oh, I don\'t think so')
+                return
+        
+
+bot = commands.Bot(command_prefix=commands.when_mentioned_or('$'), description='A bot that lives to meme.')
 bot.add_cog(Music(bot))
 
 @bot.event
 async def on_ready():
-    print('Logged in as:\n{0} (ID: {0.id})'.format(bot.user))
+    print('Logged in as:\n{0} (ID: {0.id}) at {1}'.format(bot.user, datetime.datetime.now()))
+
 
 bot.run("NDk2Mjk2MDE5ODYxMDQ1MjY5.DpOjYQ.8Q5kz_YGAL5U0idqQyJ5xjAplgU")
